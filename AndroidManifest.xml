@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ ! Excerpted from "Hello, Android! 3e",
+ ! published by The Pragmatic Bookshelf.
+ ! Copyrights apply to this code. It may not be used to create training material, 
+ ! courses, books, articles, and the like. Contact us if you are in doubt.
+ ! We make no guarantees that this code is fit for any purpose. 
+ ! Visit http://www.pragmaticprogrammer.com/titles/eband3 for more book information.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="edu.neu.madcourse.nuillegalbronze"
+      android:versionCode="2"
+      android:versionName="1.1">
+      <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <application android:icon="@drawable/icon"
+          android:label="@string/app_name"
+          android:debuggable="true">
+        <activity android:name=".Main"
+              android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>          
+        <activity android:name=".Members"
+              android:label="@string/members_title"
+              android:theme="@android:style/Theme.Dialog">
+        </activity>       
+        <activity android:name="edu.neu.madcourse.nuillegalbronze.sudoku.Sudoku"
+              android:label="@string/app_name">
+        </activity>
+        <activity android:name="edu.neu.madcourse.nuillegalbronze.sudoku.About"
+              android:label="@string/about_title"
+              android:theme="@android:style/Theme.Dialog">
+        </activity>
+        <activity android:name="edu.neu.madcourse.nuillegalbronze.sudoku.Prefs"
+              android:label="@string/settings_title">
+        </activity>
+        <activity android:name="edu.neu.madcourse.nuillegalbronze.sudoku.Game"
+              android:label="@string/game_title"/>
+    </application>
+    <uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8" />
+</manifest>
