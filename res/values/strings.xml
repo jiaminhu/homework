@@ -50,4 +50,6 @@ row, each column, and each of the 3x3 boxes
    <string name="members_text">Jiamin Hu(tracyhoo@ccs.neu.edu)\nBen Johnson(johnson.b@husky.neu.edu)
    </string>
    <string name="title_bar">NUMAD-Illegal Bronze</string>
+   <string name="boggle_name">Boggle</string>
+   <string name="boggle_label">Boggle</string>
 </resources>

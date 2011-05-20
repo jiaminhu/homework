@@ -26,6 +26,9 @@
               android:label="@string/members_title"
               android:theme="@android:style/Theme.Dialog">
         </activity>       
+        <activity android:name="edu.neu.madcourse.nuillegalbronze.boggle.Boggle"
+        	  android:label="@string/boggle_name">
+        </activity>
         <activity android:name="edu.neu.madcourse.nuillegalbronze.sudoku.Sudoku"
               android:label="@string/app_name">
         </activity>

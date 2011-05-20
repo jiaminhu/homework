@@ -32,6 +32,11 @@
          android:layout_height="wrap_content"
          android:text="@string/team_members_label" />
       <Button
+      	 android:id="@+id/boggle_button"
+      	 android:layout_width="fill_parent"
+      	 android:layout_height="wrap_content"
+      	 android:text="@string/boggle_label" />   
+      <Button
          android:id="@+id/sudoku_button"
          android:layout_width="fill_parent"
          android:layout_height="wrap_content"
