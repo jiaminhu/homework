@@ -1,154 +1,98 @@
 package edu.neu.madcourse.nuillegalbronze.boggle;
 
+
 import edu.neu.madcourse.nuillegalbronze.R;
-import edu.neu.madcourse.nuillegalbronze.sudoku.Game;
-import edu.neu.madcourse.nuillegalbronze.sudoku.Prefs;
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.Paint.FontMetrics;
-import android.graphics.Paint.Style;
-import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ImageView;
 
 public class BoggleView extends View{
 	
 	private String TAG="BoggleView";
-	private int width= (int) Math.round((getWidth() * 0.92 / 4));    // width of one tile
-	private int height=width;   // height of one tile
-	private int selX;       // X index of selection
-	private int selY;       // Y index of selection
 	
-	private boolean refreshNeeded;
+	private static final int NONE=0;
+	private static final int DRAG=1;
+	private static final int ZOOM=2;
+	private int mode=NONE;
+
+	//---------------------------------------
 	
-	private int upper_bound;
-	private int lower_bound;
-	private int left_bound;
-	private int right_bound;
-	private final Rect selRect = new Rect();	
-	private Bitmap bitmap;
-	private ShapeDrawable rect=new ShapeDrawable();
-
-	static final int NONE=0;
-	static final int DRAG=1;
-	static final int ZOOM=2;
-	int mode=NONE;
-	PointF start=new PointF();
-	PointF mid=new PointF();
-	float oldDist=1f;		
-	private TileView[] tiles;
-
-//	private final Boggle game;
-
+	private static final int ID = 42;
+	private final Boggle game;
+	
+	private float width;
+	private float height;
+	private float padding;
+	
+	private float padding_top = 100;
+	
 	public BoggleView(Context context) {
 		super(context);
-		refreshNeeded=true;
-		tiles=new TileView[16];
-		for(int i=0;i<16;i++){
-			tiles[i]=new TileView(context);
-		}
-	//	this.game = (Boggle) context;
+		game = (Boggle) context;
+		
 	    setFocusable(true);
 	    setFocusableInTouchMode(true);
 	    
 		Log.d("getw",Float.toString(getWidth()));
 	    Log.d(TAG,Float.toHexString(width));
-	    
-//	    upper_bound = (getHeight() - 4 * width ) * 3/8;
-//	    lower_bound = getHeight() - 4 * width-upper_bound;
-//	    left_bound = (float) (getWidth()*0.02);
-//	    right_bound = (float) (getWidth()*0.98);
 	}
 	
-
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		width = height = Math.min(w / (Boggle.DICE_WIDTH + 1f), h
+				/ (Boggle.DICE_HEIGHT + 1f));
+		padding = width / (Math.max(Boggle.DICE_WIDTH, Boggle.DICE_HEIGHT) + 1);
+		padding_top = 100;
+		
+		
+		Log.d(TAG, "onSizeChanged: width " + width + ", height " + height);
+		super.onSizeChanged(w, h, oldw, oldh);
+	}
+	
 	@Override
 	public void onDraw(Canvas canvas) {
+		drawBackground(canvas);
+		drawTiles(canvas);
+		drawWord(canvas);
+	}
 
-		   width = (int) Math.round((getWidth() * 0.92 / 4));
-		   height = (int) Math.round((getHeight() * 0.15 ));
-	   upper_bound = (int)Math.round((getHeight() - 4 * height ) / 2);
-	   lower_bound = upper_bound + 4 * height;
-	   left_bound = (int) Math.round((getWidth()*0.04));
-	   right_bound = left_bound + 4 * width;
-	  bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+	protected void drawBackground(Canvas canvas) {
+		Paint background = new Paint();
+		background.setColor(getResources().getColor(R.color.puzzle_background));
+		canvas.drawRect(0, 0, getWidth(), getHeight(), background);
+	}
+    protected void drawTiles(Canvas canvas) {
+        super.onDraw(canvas);
+        Rect imageBounds = new Rect();
+        
+        for (int x = 0; x < Boggle.DICE_WIDTH; x++) {
+        	for (int y = 0; y < Boggle.DICE_HEIGHT; y++) {
+        		getRect(x, y, imageBounds);
+        		
+        		game.getTile(x, y).draw(this, canvas, imageBounds, height, width);
+        	}
+        }
+    } 
+	private void drawWord(Canvas canvas) {
 
-	  
-	   // Draw the background...
-	   Paint background = new Paint();
-	   background.setColor(getResources().getColor(
-	         R.color.puzzle_background));
-	   canvas.drawRect(0, 0, getWidth(), getHeight(), background);
-
-	   rect.setBounds(left_bound, lower_bound, left_bound+width, lower_bound-height);
-	   rect.getPaint().setColor(Color.GREEN);
-Log.d("ondraw","sth");
-	   // Draw the board...
-	      
-       // Define colors for the grid lines
-       Paint dark = new Paint();
-       dark.setColor(getResources().getColor(R.color.puzzle_dark));
-
-       Paint hilite = new Paint();
-       hilite.setColor(getResources().getColor(R.color.puzzle_hilite));
-       
-       Paint light = new Paint();
-	   light.setColor(getResources().getColor(R.color.puzzle_light));
-
-//Log.d("upper_bound",Float.toString(upper_bound));
-//Log.d("lower_bound",Float.toString(lower_bound));
-//Log.d("left_bound",Float.toString(left_bound));
-//Log.d("right_bound",Float.toString(right_bound) );
-	   for(int i=0;i<5;i++){
-		   canvas.drawLine(left_bound,
-				   upper_bound + i * height,
-				   right_bound,
-				   upper_bound + i * height,
-				   dark);
-		   canvas.drawLine(left_bound + i * width,
-				   lower_bound,
-				   left_bound + i * width,
-				   upper_bound,
-				   dark);
-		   
-	   }
-	   
-
-	      // Define color and style for numbers
-	      Paint foreground = new Paint(Paint.ANTI_ALIAS_FLAG);
-	      foreground.setColor(getResources().getColor(
-	            R.color.puzzle_foreground));
-	      foreground.setStyle(Style.FILL);
-	      foreground.setTextSize(height * 0.75f);
-	      foreground.setTextScaleX(width / height);
-	      foreground.setTextAlign(Paint.Align.CENTER);	      
-	      // Draw the selection...
-	      Log.d(TAG, "selRect=" + selRect);
-	      Paint selected = new Paint();
-	      selected.setColor(getResources().getColor(
-	            R.color.puzzle_selected));
-	      canvas.drawRect(selRect, selected);
-	   }	
-
+	}
+    
 	public boolean onTouchEvent(MotionEvent event){
 		dumpEvent(event);
+		
+		int x = (int) ((event.getX() - (padding / 2f)) / (width + padding));
+		int y = (int) ((event.getY() - padding_top - (padding / 2f)) / (height + padding));
+		x = Math.min(Math.max(0, x), Boggle.DICE_WIDTH - 1);
+		y = Math.min(Math.max(0, y), Boggle.DICE_HEIGHT - 1);
+		Log.d(TAG, "x = " + x + ", y = " + y);
+		
 		switch(event.getAction()&MotionEvent.ACTION_MASK){
 		case MotionEvent.ACTION_DOWN:
-			select((int) ((event.getX()-left_bound) / width),
-		            (int) ((event.getY()-upper_bound) / height));			
-//			savedMatrix.set(matrix);
-//			start.set(event.getX(),event.getY());
+			select(x, y);			
 			mode=DRAG;
 			Log.d("actiondown","mode=drag");
 			break;
@@ -159,40 +103,28 @@ Log.d("ondraw","sth");
 			break;
 		case MotionEvent.ACTION_MOVE:
 			if(mode==DRAG){
-				select((int) ((event.getX()-left_bound) / width),
-			            (int) ((event.getY()-upper_bound) / height));
+				select(x, y);	
 			}
 			break;
-			
-		
 		}
-//		view.setImageMatrix(matrix);
+
 		return true;		
 	}
 
-	   
 	private void select(int x, int y){
-		selX = Math.min(Math.max(x, 0), 3);
-		selY = Math.min(Math.max(y, 0), 3);
-		getRect(selX, selY, selRect);
-	      Paint selected = new Paint();
-	      selected.setColor(getResources().getColor(
-	            R.color.puzzle_selected));
-	      
-	 //   rect=new ShapeDrawable();  
-	    rect.setBounds(selRect);
-	    rect.getPaint().setColor(getResources().getColor(
-	            R.color.puzzle_selected));
-
-		invalidate(selRect);
-
-		
+		game.selectTile(x, y);
+		Rect selectedArea = new Rect();
+		getRect(x, y, selectedArea);
+		invalidate(selectedArea);
 	}
 	
-	private void getRect(int x, int y, Rect rect){
-		rect.set(left_bound+(x*width),upper_bound+(y*height),
-				left_bound+(x*width+width),upper_bound+(y*height)+height);
-		
+	private void getRect(int x, int y, Rect rect) {
+		float paddingX = (x + 1) * padding;
+		float paddingY = (y + 1) * padding;
+		float left = paddingX + x * width;
+		float top = paddingY + y * height + padding_top;
+		rect.set((int) (left), (int) (top), (int) (left + width),
+				(int) (top + height));
 	}
 
     private void dumpEvent(MotionEvent event){
