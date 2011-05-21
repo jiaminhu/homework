@@ -1,4 +1,3 @@
-package edu.neu.madcourse.nuillegalbronze.boggle;
 import java.io.*;
 import java.util.*;
 
@@ -13,7 +12,7 @@ public class Trie extends AbstractCollection<String> implements Set<String> {
     public static Trie fromFile(String filename) {
         Trie trie = new Trie();
         try {
-            Scanner in = new Scanner(new File(filename));
+            Scanner in = new Scanner(new File(Trie.class.getResource(filename).getFile()));
             while (in.hasNext()) {
                     trie.add(in.next());
             }
